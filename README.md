@@ -37,13 +37,16 @@ dotnet run
 To host your client-side application separately using an HTTP server, you can use a simple Node.js server or any other HTTP server of your choice.
 
 Using http-server:
-Install http-server:
+
+3.1. Install http-server:
 
 If you don't have http-server installed globally, you can install it using npm:
 ```
 npm install -g http-server
-Run the HTTP server:
 ```
+
+3.2. Run the HTTP server:
+
 Navigate to the directory where your built client-side files are located and start the server:
 ```
 http-server
@@ -52,7 +55,9 @@ http-server
 ### Access your client application:
 
 Open your browser and navigate to the address provided by http-server: http://localhost:8080. 
+
 To use the chat, you can open this address in two tabs. When you enter text and send it in one of the chats, the changes will be reflected in the other.
+
 When you open and create a new browser tab with chat instance, the current message history will be displayed inside.
 
 ### Acknowledgments
