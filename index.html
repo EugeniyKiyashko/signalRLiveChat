@@ -17,17 +17,22 @@
             .withUrl("http://localhost:5000/chathub")
             .build();
 
-        connection.on("ReceiveMessage", (user, message) => {
-            if ($("#chat").dxChat('instance').option('user').id === user) return;
+        connection.on("ReceiveMessage", (author, message) => {
+            if ($("#chat").dxChat('instance').option('user').id === author.id) return;
 
-            $("#chat").dxChat('instance').renderMessage({ text: message, timestamp: new Date(), author: { id: user } }, { id: user })
+            $("#chat").dxChat('instance').renderMessage({
+                text: message,
+                timestamp: new Date(),
+                author
+            },
+                author);
         });
 
         connection.on("ReceiveChatHistory", (messages) => {
             messages.forEach(msg => {
                 console.log(`[${msg.timestamp}] ${msg.user}: ${msg.message}`);
 
-                $("#chat").dxChat('instance').renderMessage({ text: msg.message, timestamp: new Date(msg.timestamp), author: { id: msg.user } }, { id: msg.user })
+                $("#chat").dxChat('instance').renderMessage({ text: msg.message, timestamp: new Date(msg.timestamp), author: msg.user }, msg.user)
             });
         });
 
@@ -39,14 +44,21 @@
 
         $(() => {
             const dxChat = $("#chat").dxChat({
+                user: { name: `User ${getRandomChar()}` },
                 title: 'SignalR integration',
                 onMessageSend(e) {
                     connection
-                        .invoke("SendMessage", e.message.author.id, e.message.text)
+                        .invoke("SendMessage", e.message.author, e.message.text)
                         .catch(err => console.error(err.toString()));
                 }
             }).dxChat('instance');
         });
+
+        function getRandomChar() {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const randomIndex = Math.floor(Math.random() * letters.length);
+            return letters[randomIndex];
+        }
     </script>
 </body>
 </html>
