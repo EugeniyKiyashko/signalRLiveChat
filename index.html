@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>SignalR Chat</title>
+    <link rel="stylesheet" type="text/css" href="https://eugeniykiyashko.github.io/DevExtreme-dxDemos/artifacts/24_2_css/dx.fluent.blue.light.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@7.0.0/dist/browser/signalr.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" charset="utf-8"></script>
+    <script src="https://eugeniykiyashko.github.io/DevExtreme-dxDemos/artifacts/dx.all.24.2.js" charset="utf-8"></script>
+
+</head>
+<body>
+    <div id="chat"></div>
+
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("http://localhost:5000/chathub")
+            .build();
+
+        connection.on("ReceiveMessage", (user, message) => {
+            if ($("#chat").dxChat('instance').option('user').id === user) return;
+
+            $("#chat").dxChat('instance').renderMessage({ text: message, timestamp: new Date(), author: { id: user } }, { id: user })
+        });
+
+        connection.on("ReceiveChatHistory", (messages) => {
+            messages.forEach(msg => {
+                console.log(`[${msg.timestamp}] ${msg.user}: ${msg.message}`);
+
+                $("#chat").dxChat('instance').renderMessage({ text: msg.message, timestamp: new Date(msg.timestamp), author: { id: msg.user } }, { id: msg.user })
+            });
+        });
+
+
+        connection.start().then(() => {
+            connection.invoke("GetChatHistory");
+        }).catch(err => console.error(err.toString()));
+
+
+        $(() => {
+            const dxChat = $("#chat").dxChat({
+                title: 'SignalR integration',
+                onMessageSend(e) {
+                    connection
+                        .invoke("SendMessage", e.message.author.id, e.message.text)
+                        .catch(err => console.error(err.toString()));
+                }
+            }).dxChat('instance');
+        });
+    </script>
+</body>
+</html>
+
